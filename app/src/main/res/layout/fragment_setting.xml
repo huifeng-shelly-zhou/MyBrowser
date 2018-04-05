@@ -1,0 +1,45 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.huifeng.mybrowser.FragmentSetting">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/white"
+        android:onClick="emptyClick"
+        android:layout_marginLeft="100dp"
+        android:layout_marginStart="100dp">
+
+        <RelativeLayout
+            android:id="@+id/setting_header"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <ImageView
+                android:id="@+id/setting_close"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_clear"
+                android:layout_margin="10dp"
+                android:tint="@color/dark"
+                android:onClick="closeSettingFragment"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"/>
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:background="@color/dark"
+                android:layout_below="@+id/setting_close"
+                android:layout_height="1dp" />
+        </RelativeLayout>
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/favor_recycler_view"
+            android:scrollbars="vertical"
+            android:layout_width="match_parent"
+            android:layout_below="@+id/setting_header"
+            android:layout_height="match_parent"/>
+
+    </RelativeLayout>
+
+</FrameLayout>
