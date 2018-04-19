@@ -5,6 +5,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -39,6 +40,7 @@ public class FavoriteRecyclerAdapter extends RecyclerView.Adapter<FavoriteRecycl
     @Override
     public void onBindViewHolder(@NonNull FavoriteItemViewHolder holder, int position) {
         holder.container.setTag(list.get(position));
+        holder.delete_btn.setTag(list.get(position));
         holder.title.setText(list.get(position).getTitle());
         holder.url.setText(list.get(position).getUrl());
     }
@@ -51,12 +53,14 @@ public class FavoriteRecyclerAdapter extends RecyclerView.Adapter<FavoriteRecycl
     public static class FavoriteItemViewHolder extends RecyclerView.ViewHolder{
         LinearLayout container;
         TextView title, url;
+        ImageView delete_btn;
 
         public FavoriteItemViewHolder(View itemView) {
             super(itemView);
             container = itemView.findViewById(R.id.favor_container);
             title = itemView.findViewById(R.id.favor_title);
             url = itemView.findViewById(R.id.favor_url);
+            delete_btn = itemView.findViewById(R.id.favor_delete_btn);
         }
     }
 }

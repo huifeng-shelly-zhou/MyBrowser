@@ -27,6 +27,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.FrameLayout;
+import android.widget.ProgressBar;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -36,10 +37,11 @@ import com.huifeng.mybrowser.Models.FavoriteModel;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
-
+    public final static String WEB_URL = "WEB_URL";
     private AutoCompleteTextView urlTxt;
     private WebView browser_web_view;
     private MenuItem favorIcon;
+    private ProgressBar indeterminateBar;
 
     Toolbar myToolbar;
     private ArrayAdapter<String> adapter;
@@ -48,6 +50,7 @@ public class MainActivity extends AppCompatActivity {
     private FragmentSetting fragmentSetting;
 
     private String host = "";
+    private String home_url = "https://www.google.ca";
     private String my_url = "https://www.google.ca";
 
     private SharedPreferences sharedPref;
@@ -61,9 +64,21 @@ public class MainActivity extends AppCompatActivity {
 
         myToolbar = findViewById(R.id.my_toolbar);
         setSupportActionBar(myToolbar);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+        myToolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                my_url = home_url;
+                browser_web_view.loadUrl(my_url);
+            }
+        });
+
 
         urlTxt = findViewById(R.id.browser_url_txt);
         browser_web_view = findViewById(R.id.browser_web_view);
+
+        indeterminateBar = findViewById(R.id.indeterminateBar);
+        indeterminateBar.setVisibility(View.INVISIBLE);
 
         sharedPref = this.getSharedPreferences(preName, Context.MODE_PRIVATE);
 
@@ -88,15 +103,17 @@ public class MainActivity extends AppCompatActivity {
         browser_web_view.getSettings().setBuiltInZoomControls(true);
         browser_web_view.getSettings().setDisplayZoomControls(false);
         browser_web_view.getSettings().setUseWideViewPort(true);
+        browser_web_view.getSettings().setLoadWithOverviewMode(true);
         browser_web_view.setWebViewClient(new WebViewClient() {
             @Override
             public void onPageStarted(WebView view, String url, Bitmap favicon) {
                 // TODO Auto-generated method stub
                 super.onPageStarted(view, url, favicon);
+                indeterminateBar.setVisibility(View.VISIBLE);
                 Log.i("onPageStarted", url);
                 if (!urlTxt.getText().toString().equalsIgnoreCase(url)) {
                     urlTxt.setText(url);
-
+                    my_url = url;
                 }
                 setHost(url);
 
@@ -150,6 +167,8 @@ public class MainActivity extends AppCompatActivity {
             public void onPageFinished(WebView view,
                                        String url) {
                 Log.i("onPageFinished", url);
+
+                indeterminateBar.setVisibility(View.INVISIBLE);
             }
 
             @Override
@@ -169,6 +188,10 @@ public class MainActivity extends AppCompatActivity {
         });
         browser_web_view.setWebChromeClient(new WebChromeClient());
 
+        if(savedInstanceState != null && savedInstanceState.getString(WEB_URL) != null){
+            my_url = savedInstanceState.getString(WEB_URL);
+        }
+
         browser_web_view.loadUrl(my_url);
         browser_web_view.requestFocus();
     }
@@ -184,13 +207,18 @@ public class MainActivity extends AppCompatActivity {
         FavoriteModel favoriteModel = getCurrentWebPage();
         updateFavorColor(favoriteModel);
 
+        MenuItem more = menu.findItem(R.id.action_more);
+        if(more != null){
+            //more.getIcon().setColorFilter(getResources().getColor(R.color.dark), PorterDuff.Mode.SRC_IN);
+        }
+
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.action_settings:
+            case R.id.action_more:
                 // User chose the "Settings" item, show the app settings UI...
                 openSettingFragment();
                 return true;
@@ -198,7 +226,8 @@ public class MainActivity extends AppCompatActivity {
             case R.id.action_favorite:
                 // User chose the "Favorite" action, mark the current item
                 // as a favorite...
-                toggleFavor();
+                FavoriteModel favoriteModel = getCurrentWebPage();
+                toggleFavor(favoriteModel);
                 return true;
 
             default:
@@ -220,15 +249,25 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        // Save the user's current game state
+        savedInstanceState.putString(WEB_URL, my_url);
+
+
+        // Always call the superclass so it can save the view hierarchy state
+        super.onSaveInstanceState(savedInstanceState);
+    }
+
     private void updateFavorColor(FavoriteModel favor) {
         if(favorIcon != null){
             favoriteList = getSavedFavoriteList();
-            favorIcon.getIcon().setColorFilter(getResources().getColor(R.color.white), PorterDuff.Mode.SRC_IN);
+            favorIcon.getIcon().setColorFilter(getResources().getColor(R.color.dark), PorterDuff.Mode.SRC_IN);
             for (int i = 0; i < favoriteList.size(); i++) {
                 if (favor.getUrl().equalsIgnoreCase(favoriteList.get(i).getUrl())) {
                     Drawable icon = favorIcon.getIcon();
                     if (icon != null) {
-                        favorIcon.getIcon().setColorFilter(getResources().getColor(R.color.colorAccent), PorterDuff.Mode.SRC_IN);
+                        favorIcon.getIcon().setColorFilter(getResources().getColor(R.color.pink), PorterDuff.Mode.SRC_IN);
                     }
                     break;
                 }
@@ -250,8 +289,11 @@ public class MainActivity extends AppCompatActivity {
         if (urlTxt != null) {
             my_url = urlTxt.getText().toString();
             browser_web_view.loadUrl(my_url);
+
             InputMethodManager imm = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
-            imm.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
+            if (imm != null) {
+                imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+            }
         }
     }
 
@@ -285,8 +327,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void toggleFavor() {
-        FavoriteModel favoriteModel = getCurrentWebPage();
+    private void toggleFavor(FavoriteModel favoriteModel) {
 
         if (!favoriteModel.getUrl().isEmpty()) {
             favoriteList = getSavedFavoriteList();
@@ -306,7 +347,7 @@ public class MainActivity extends AppCompatActivity {
             }
             saveFavoriteList();
             updateFavorColor(favoriteModel);
-
+            updateSettingFragment();
         }
     }
 
@@ -352,13 +393,36 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void favorItemClick(View v){
+        host = "";
         FavoriteModel favoriteModel = (FavoriteModel) v.getTag();
-        if(favoriteModel != null && browser_web_view != null){
-            browser_web_view.loadUrl(favoriteModel.getUrl());
+        if(favoriteModel != null && urlTxt != null){
+            urlTxt.setText(favoriteModel.getUrl());
+            my_url = urlTxt.getText().toString();
+            browser_web_view.loadUrl(my_url);
             closeSettingFragment(v);
+
         }
     }
 
     public void emptyClick(View v){}
+
+    public void deleteFavorite(View v){
+        FavoriteModel favoriteModel = (FavoriteModel) v.getTag();
+        if(favoriteModel != null){
+            toggleFavor(favoriteModel);
+        }
+    }
+
+    private void updateSettingFragment(){
+        if(fragmentSetting != null && fragmentSetting.adapter != null){
+            fragmentSetting.adapter.updateFavorList(getSavedFavoriteList());
+        }
+    }
+
+    public void clearUrlText(View v){
+        if(urlTxt != null){
+            urlTxt.setText("");
+        }
+    }
 }
 
