@@ -68,6 +68,7 @@ public class MainActivity extends AppCompatActivity {
         myToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                host = "";
                 my_url = home_url;
                 browser_web_view.loadUrl(my_url);
             }
@@ -88,12 +89,16 @@ public class MainActivity extends AppCompatActivity {
         urlTxt.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                host = "";
+
                 if (urlTxt != null) {
+                    host = "";
                     my_url = list.get(i);
                     browser_web_view.loadUrl(my_url);
+
                     InputMethodManager imm = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
-                    imm.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
+                    if (imm != null) {
+                        imm.hideSoftInputFromWindow(urlTxt.getWindowToken(), 0);
+                    }
                 }
             }
         });
@@ -267,7 +272,7 @@ public class MainActivity extends AppCompatActivity {
                 if (favor.getUrl().equalsIgnoreCase(favoriteList.get(i).getUrl())) {
                     Drawable icon = favorIcon.getIcon();
                     if (icon != null) {
-                        favorIcon.getIcon().setColorFilter(getResources().getColor(R.color.pink), PorterDuff.Mode.SRC_IN);
+                        favorIcon.getIcon().setColorFilter(getResources().getColor(R.color.yellow), PorterDuff.Mode.SRC_IN);
                     }
                     break;
                 }
@@ -404,8 +409,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void emptyClick(View v){}
-
     public void deleteFavorite(View v){
         FavoriteModel favoriteModel = (FavoriteModel) v.getTag();
         if(favoriteModel != null){
@@ -422,6 +425,12 @@ public class MainActivity extends AppCompatActivity {
     public void clearUrlText(View v){
         if(urlTxt != null){
             urlTxt.setText("");
+        }
+    }
+
+    public void forwardBrowser(View v){
+        if (browser_web_view.canGoForward()){
+            browser_web_view.goForward();
         }
     }
 }
