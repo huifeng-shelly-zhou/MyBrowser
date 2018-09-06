@@ -6,8 +6,13 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
-        <item name="android:textColor">@android:color/white</item>
         <item name="android:actionMenuTextColor">@android:color/white</item>
+    </style>
+
+    <style name="myActionBar" >
+        <item name="colorControlNormal">@color/dark</item>
+        <item name="android:textColorSecondary">@color/dark</item>
+
     </style>
 
 </resources>

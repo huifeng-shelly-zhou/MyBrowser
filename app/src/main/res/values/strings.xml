@@ -2,7 +2,7 @@
     <string name="app_name">MyBrowser</string>
     <string name="go">Go</string>
     <string name="action_favorite">Favorite</string>
-    <string name="action_settings">Setting</string>
+    <string name="action_more">More</string>
     <string name="app_title">My Browser</string>
 
     <!-- TODO: Remove or change this placeholder text -->
